@@ -32,3 +32,15 @@ CREATE TABLE Staff (
     phone TEXT,
     hire_date DATE NOT NULL DEFAULT CURRENT_DATE
 );
+
+CREATE TABLE Loan (
+    loan_id INTEGER PRIMARY KEY,
+    member_id INTEGER NOT NULL,
+    book_id INTEGER NOT NULL,
+    loan_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    due_date DATE NOT NULL,
+    return_date DATE,
+    status TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active', 'Returned', 'Overdue')),
+    FOREIGN KEY (member_id) REFERENCES Member(member_id),
+    FOREIGN KEY (book_id) REFERENCES Book(book_id)
+);

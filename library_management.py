@@ -245,3 +245,34 @@ class LibraryManagementSystem:
             print("Please enter valid numeric IDs!")
         except Exception as e:
             print(f"Error: {e}")
+
+    def renew_book(self):
+        """Process book renewal"""
+        try:
+            member_id = int(input("Enter Member ID: "))
+            book_id = int(input("Enter Book ID: "))
+            
+            # Check if loan exists
+            loan_check = self.execute_query(
+                "SELECT * FROM LOAN WHERE member_id = ? AND book_id = ? AND status = 'Active'",
+                (member_id, book_id)
+            )
+            if not loan_check:
+                print("No active loan found for this book and member!")
+                return
+            
+            # Renew the loan
+            new_due_date = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
+            update_loan = """
+            UPDATE LOAN SET due_date = ? WHERE member_id = ? AND book_id = ? AND status = 'Active'
+            """
+            
+            if self.execute_update(update_loan, (new_due_date, member_id, book_id)) > 0:
+                print(f"Book renewed successfully! New Due Date: {new_due_date.strftime('%b %#d, %Y')}")
+            else:
+                print("Failed to renew the book!")
+                
+        except ValueError:
+            print("Please enter valid numeric IDs!")
+        except Exception as e:
+            print(f"Error: {e}")

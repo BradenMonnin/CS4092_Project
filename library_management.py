@@ -276,3 +276,41 @@ class LibraryManagementSystem:
             print("Please enter valid numeric IDs!")
         except Exception as e:
             print(f"Error: {e}")
+
+    def return_book(self):
+        """Process book return"""
+        try:
+            member_id = int(input("Enter Member ID: "))
+            book_id = int(input("Enter Book ID: "))
+            
+            # Check if loan exists
+            loan_check = self.execute_query(
+                "SELECT * FROM LOAN WHERE member_id = ? AND book_id = ? AND status = 'Active'",
+                (member_id, book_id)
+            )
+            if not loan_check:
+                print("No active loan found for this book and member!")
+                return
+            
+            # Update the loan status to 'Returned'
+            update_loan = """
+            UPDATE LOAN SET status = 'Returned' WHERE member_id = ? AND book_id = ? AND status = 'Active'
+            """
+            
+            # Update available copies
+            update_book = """
+            UPDATE BOOK SET available_copies = available_copies + 1 
+            WHERE book_id = ?
+            """
+            
+            if (self.execute_update(update_loan, (member_id, book_id)) > 0 and
+                self.execute_update(update_book, (book_id,)) > 0):
+                
+                print("Book returned successfully!")
+            else:
+                print("Failed to return the book!")
+                
+        except ValueError:
+            print("Please enter valid numeric IDs!")
+        except Exception as e:
+            print(f"Error: {e}")

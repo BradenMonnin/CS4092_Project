@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 class LibraryDatabase:
     def __init__(self, db_path="library_database.db"):
@@ -179,3 +180,68 @@ class LibraryManagementSystem:
             self.display_menu()
         else:
             print("Invalid choice.")
+
+    def borrow_book(self):
+        """Process book borrowing"""
+        try:
+            member_id = int(input("Enter Member ID: "))
+            book_id = int(input("Enter Book ID: "))
+            
+            # Check if member exists
+            member_check = self.execute_query("SELECT * FROM MEMBER WHERE member_id = ?", (member_id,))
+            if not member_check:
+                print("Member not found!")
+                return
+            
+            # Check if book exists and is available
+            book_check = self.execute_query(
+                "SELECT * FROM BOOK WHERE book_id = ? AND available_copies > 0", 
+                (book_id,)
+            )
+            if not book_check:
+                print("Book not found or no copies available!")
+                return
+            
+            # Check member's current loan count
+            loan_count = self.execute_query(
+                "SELECT COUNT(*) as count FROM LOAN WHERE member_id = ? AND status = 'Active'",
+                (member_id,)
+            )[0]['count']
+            
+            if loan_count >= 5:
+                print("Member has reached the maximum loan limit (5 books)!")
+                return
+            
+            # Create loan record
+            loan_date = datetime.now().strftime('%Y-%m-%d')
+            due_date = (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
+            
+            insert_loan = """
+            INSERT INTO LOAN (member_id, book_id, loan_date, due_date, status)
+            VALUES (?, ?, ?, ?, 'Active')
+            """
+            
+            # Update available copies
+            update_book = """
+            UPDATE BOOK SET available_copies = available_copies - 1 
+            WHERE book_id = ?
+            """
+            
+            # Execute queries
+            if (self.execute_update(insert_loan, (member_id, book_id, loan_date, due_date)) > 0 and
+                self.execute_update(update_book, (book_id,)) > 0):
+                
+                member_name = f"{member_check[0]['first_name']} {member_check[0]['last_name']}"
+                book_title = book_check[0]['title']
+                
+                print(f"Book borrowed successfully!")
+                print(f"Member: {member_name}")
+                print(f"Book: {book_title}")
+                print(f"Due Date: {due_date.strftime('%b %#d, %Y')}")
+            else:
+                print("Failed to process book borrowing!")
+                
+        except ValueError:
+            print("Please enter valid numeric IDs!")
+        except Exception as e:
+            print(f"Error: {e}")

@@ -22,3 +22,13 @@ CREATE TABLE Member (
     zip_code TEXT,
     join_date DATE NOT NULL DEFAULT CURRENT_DATE
 );
+
+CREATE TABLE Staff (
+    staff_id INTEGER PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    role TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    hire_date DATE NOT NULL DEFAULT CURRENT_DATE
+);

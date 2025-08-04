@@ -590,3 +590,20 @@ class LibraryManagementSystem:
             print("Please enter a valid numeric Member ID.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def view_all_members(self):
+        """View all library members"""
+        try:
+            query = "SELECT * FROM Member"
+            members = self.db.execute_query(query)
+            if members:
+                print("\nAll Members:")
+                for member in members:
+                    print(f"ID: {member['member_id']}, Name: {member['first_name']} {member['last_name']}, "
+                          f"Email: {member['email']}, Phone: {member['phone']}, "
+                          f"Address: {member['street']}, {member['city']}, {member['state']} {member['zip_code']}, "
+                          f"Join Date: {member['join_date']}")
+            else:
+                print("No members found.")
+        except Exception as e:
+            print(f"Error: {e}")

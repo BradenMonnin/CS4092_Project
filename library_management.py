@@ -726,3 +726,25 @@ class LibraryManagementSystem:
                 print("No staff members found.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def search_staff(self):
+        """Search for staff members by full name or email"""
+        try:
+            search_term = input("Enter search term (full name or email): ").strip()
+            query = """
+            SELECT * FROM Staff 
+            WHERE (first_name || ' ' || last_name) LIKE ? OR email LIKE ?
+            """
+            params = ('%' + search_term + '%', '%' + search_term + '%')
+            staff_members = self.db.execute_query(query, params)
+            
+            if staff_members:
+                print("\nSearch Results:")
+                for staff in staff_members:
+                    print(f"ID: {staff['staff_id']}, Name: {staff['first_name']} {staff['last_name']}, "
+                          f"Email: {staff['email']}, Phone: {staff['phone']}, Role: {staff['role']}, "
+                          f"Hire Date: {staff['hire_date']}")
+            else:
+                print("No staff members found matching the search term.")
+        except Exception as e:
+            print(f"Error: {e}")

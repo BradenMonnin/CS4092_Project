@@ -338,3 +338,26 @@ class LibraryManagementSystem:
                 
         except Exception as e:
             print(f"Error: {e}")
+
+    def view_active_loans(self):
+        """View all active loans"""
+        try:
+            query = """
+            SELECT LOAN.loan_id, MEMBER.first_name, MEMBER.last_name, BOOK.title, LOAN.due_date 
+            FROM LOAN 
+            JOIN MEMBER ON LOAN.member_id = MEMBER.member_id 
+            JOIN BOOK ON LOAN.book_id = BOOK.book_id 
+            WHERE LOAN.status = 'Active'
+            """
+            active_loans = self.db.execute_query(query)
+            
+            if active_loans:
+                print("\nActive Loans:")
+                for loan in active_loans:
+                    print(f"Loan ID: {loan['loan_id']}, Member: {loan['first_name']} {loan['last_name']}, "
+                          f"Book: {loan['title']}, Due Date: {loan['due_date']}")
+            else:
+                print("No active loans found.")
+                
+        except Exception as e:
+            print(f"Error: {e}")

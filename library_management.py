@@ -695,3 +695,18 @@ class LibraryManagementSystem:
             print("Please enter a valid numeric Staff ID.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def remove_staff(self):
+        """Remove a staff member"""
+        try:
+            staff_id = int(input("Enter Staff ID to remove: "))
+            query = "DELETE FROM Staff WHERE staff_id = ?"
+            result = self.db.execute_update(query, (staff_id,))
+            if result:
+                print("Staff member removed successfully!")
+            else:
+                print("Failed to remove staff member. Check if the staff member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Staff ID.")
+        except Exception as e:
+            print(f"Error: {e}")

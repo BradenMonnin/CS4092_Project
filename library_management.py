@@ -653,3 +653,45 @@ class LibraryManagementSystem:
                 print("Failed to add staff member. Email may already exist.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def update_staff(self):
+        """Update an existing staff member"""
+        try:
+            staff_id = int(input("Enter Staff ID to update: "))
+            first_name = input("Enter new first name (leave blank to keep current): ").strip()
+            last_name = input("Enter new last name (leave blank to keep current): ").strip()
+            email = input("Enter new email (leave blank to keep current): ").strip()
+            phone = input("Enter new phone (leave blank to keep current): ").strip()
+            role = input("Enter new role (leave blank to keep current): ").strip()
+
+            query = "UPDATE Staff SET "
+            params = []
+
+            if first_name:
+                query += "first_name = ?, "
+                params.append(first_name)
+            if last_name:
+                query += "last_name = ?, "
+                params.append(last_name)
+            if email:
+                query += "email = ?, "
+                params.append(email)
+            if phone:
+                query += "phone = ?, "
+                params.append(phone)
+            if role:
+                query += "role = ? "
+                params.append(role)
+
+            query = query.rstrip(", ") + " WHERE staff_id = ?"
+            params.append(staff_id)
+
+            result = self.db.execute_update(query, tuple(params))
+            if result:
+                print("Staff member updated successfully!")
+            else:
+                print("Failed to update staff member. Check if the staff member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Staff ID.")
+        except Exception as e:
+            print(f"Error: {e}")

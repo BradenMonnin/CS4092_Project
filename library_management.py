@@ -607,3 +607,26 @@ class LibraryManagementSystem:
                 print("No members found.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def search_members(self):
+        """Search for members by full name or email"""
+        try:
+            search_term = input("Enter search term (full name or email): ").strip()
+            query = """
+            SELECT * FROM Member 
+            WHERE (first_name || ' ' || last_name) LIKE ? OR email LIKE ?
+            """
+            params = ('%' + search_term + '%', '%' + search_term + '%')
+            members = self.db.execute_query(query, params)
+            
+            if members:
+                print("\nSearch Results:")
+                for member in members:
+                    print(f"ID: {member['member_id']}, Name: {member['first_name']} {member['last_name']}, "
+                          f"Email: {member['email']}, Phone: {member['phone']}, "
+                          f"Address: {member['street']}, {member['city']}, {member['state']} {member['zip_code']}, "
+                          f"Join Date: {member['join_date']}")
+            else:
+                print("No members found matching the search term.")
+        except Exception as e:
+            print(f"Error: {e}")

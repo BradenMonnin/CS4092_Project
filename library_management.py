@@ -522,3 +522,56 @@ class LibraryManagementSystem:
         except Exception as e:
             print(f"Error: {e}")
 
+    def update_member(self):
+        """Update an existing library member"""
+        try:
+            member_id = int(input("Enter Member ID to update: "))
+            first_name = input("Enter new first name (leave blank to keep current): ").strip()
+            last_name = input("Enter new last name (leave blank to keep current): ").strip()
+            email = input("Enter new email (leave blank to keep current): ").strip()
+            phone = input("Enter new phone (leave blank to keep current): ").strip()
+            street = input("Enter new street address (leave blank to keep current): ").strip()
+            city = input("Enter new city (leave blank to keep current): ").strip()
+            state = input("Enter new state (leave blank to keep current): ").strip()
+            zip_code = input("Enter new zip code (leave blank to keep current): ").strip()
+
+            query = "UPDATE Member SET "
+            params = []
+
+            if first_name:
+                query += "first_name = ?, "
+                params.append(first_name)
+            if last_name:
+                query += "last_name = ?, "
+                params.append(last_name)
+            if email:
+                query += "email = ?, "
+                params.append(email)
+            if phone:
+                query += "phone = ?, "
+                params.append(phone)
+            if street:
+                query += "street = ?, "
+                params.append(street)
+            if city:
+                query += "city = ?, "
+                params.append(city)
+            if state:
+                query += "state = ?, "
+                params.append(state)
+            if zip_code:
+                query += "zip_code = ? "
+                params.append(zip_code)
+
+            query = query.rstrip(", ") + " WHERE member_id = ?"
+            params.append(member_id)
+
+            result = self.db.execute_update(query, tuple(params))
+            if result:
+                print("Member updated successfully!")
+            else:
+                print("Failed to update member. Check if the member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Member ID.")
+        except Exception as e:
+            print(f"Error: {e}")

@@ -748,3 +748,18 @@ class LibraryManagementSystem:
                 print("No staff members found matching the search term.")
         except Exception as e:
             print(f"Error: {e}")
+
+
+
+def main():
+    system = LibraryManagementSystem()
+    while True:
+        system.display_menu()
+        exit_choice = input("Type 'exit' to quit or press Enter to continue: ").strip().lower()
+        if exit_choice == 'exit':
+            system.db.disconnect()
+            print("Goodbye!")
+            break
+
+if __name__ == "__main__":
+    main()

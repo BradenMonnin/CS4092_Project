@@ -495,3 +495,30 @@ class LibraryManagementSystem:
                 print("No books found matching the search term.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def register_member(self):
+        """Register a new library member"""
+        try:
+            first_name = input("Enter first name: ").strip()
+            last_name = input("Enter last name: ").strip()
+            email = input("Enter email: ").strip()
+            phone = input("Enter phone (optional): ").strip()
+            street = input("Enter street address (optional): ").strip()
+            city = input("Enter city (optional): ").strip()
+            state = input("Enter state (optional): ").strip()
+            zip_code = input("Enter zip code (optional): ").strip()
+            join_date = datetime.now().strftime('%Y-%m-%d')
+
+            query = """
+            INSERT INTO Member (first_name, last_name, email, phone, street, city, state, zip_code, join_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            params = (first_name, last_name, email, phone, street, city, state, zip_code, join_date)
+            result = self.db.execute_update(query, params)
+            if result:
+                print("Member registered successfully!")
+            else:
+                print("Failed to register member. Email may already exist.")
+        except Exception as e:
+            print(f"Error: {e}")
+

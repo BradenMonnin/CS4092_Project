@@ -575,3 +575,18 @@ class LibraryManagementSystem:
             print("Please enter a valid numeric Member ID.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def remove_member(self):
+        """Remove a library member"""
+        try:
+            member_id = int(input("Enter Member ID to remove: "))
+            query = "DELETE FROM Member WHERE member_id = ?"
+            result = self.db.execute_update(query, (member_id,))
+            if result:
+                print("Member removed successfully!")
+            else:
+                print("Failed to remove member. Check if the member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Member ID.")
+        except Exception as e:
+            print(f"Error: {e}")

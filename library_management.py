@@ -361,3 +361,34 @@ class LibraryManagementSystem:
                 
         except Exception as e:
             print(f"Error: {e}")
+
+    def add_book(self):
+        """Add a new book to the library"""
+        try:
+            title = input("Enter book title: ").strip()
+            author = input("Enter author name: ").strip()
+            isbn = input("Enter ISBN: ").strip()
+            publication_year = int(input("Enter publication year: "))
+            genre = input("Enter genre: ").strip()
+            total_copies = int(input("Enter total copies: "))
+
+            if total_copies <= 0:
+                print("Total copies must be greater than 0.")
+                return
+
+            available_copies = total_copies
+
+            query = """
+            INSERT INTO Book (title, author, isbn, publication_year, genre, total_copies, available_copies)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """
+            result = self.db.execute_update(query, (title, author, isbn, publication_year, genre, total_copies, available_copies))
+            if result:
+                print("Book added successfully!")
+            else:
+                print("Failed to add book. ISBN may already exist.")
+        except ValueError:
+            print("Please enter valid numeric values for publication year and total copies.")
+        except Exception as e:
+            print(f"Error: {e}")
+

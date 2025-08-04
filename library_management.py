@@ -361,3 +361,137 @@ class LibraryManagementSystem:
                 
         except Exception as e:
             print(f"Error: {e}")
+
+    def add_book(self):
+        """Add a new book to the library"""
+        try:
+            title = input("Enter book title: ").strip()
+            author = input("Enter author name: ").strip()
+            isbn = input("Enter ISBN: ").strip()
+            publication_year = int(input("Enter publication year: "))
+            genre = input("Enter genre: ").strip()
+            total_copies = int(input("Enter total copies: "))
+
+            if total_copies <= 0:
+                print("Total copies must be greater than 0.")
+                return
+
+            available_copies = total_copies
+
+            query = """
+            INSERT INTO Book (title, author, isbn, publication_year, genre, total_copies, available_copies)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """
+            result = self.db.execute_update(query, (title, author, isbn, publication_year, genre, total_copies, available_copies))
+            if result:
+                print("Book added successfully!")
+            else:
+                print("Failed to add book. ISBN may already exist.")
+        except ValueError:
+            print("Please enter valid numeric values for publication year and total copies.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def update_book(self):
+        """Update an existing book in the library"""
+        try:
+            book_id = int(input("Enter Book ID to update: "))
+            title = input("Enter new book title (leave blank to keep current): ").strip()
+            author = input("Enter new author name (leave blank to keep current): ").strip()
+            isbn = input("Enter new ISBN (leave blank to keep current): ").strip()
+            publication_year = input("Enter new publication year (leave blank to keep current): ").strip()
+            genre = input("Enter new genre (leave blank to keep current): ").strip()
+            total_copies = input("Enter new total copies (leave blank to keep current): ").strip()
+
+            query = "UPDATE Book SET "
+            params = []
+
+            if title:
+                query += "title = ?, "
+                params.append(title)
+            if author:
+                query += "author = ?, "
+                params.append(author)
+            if isbn:
+                query += "isbn = ?, "
+                params.append(isbn)
+            if publication_year:
+                query += "publication_year = ?, "
+                params.append(int(publication_year))
+            if genre:
+                query += "genre = ?, "
+                params.append(genre)
+            if total_copies:
+                query += "total_copies = ?, available_copies = ? "
+                params.append(int(total_copies))
+                params.append(int(total_copies))  # Reset available copies to total copies
+            else:
+                query = query.rstrip(", ")  # Remove trailing comma
+
+            query += " WHERE book_id = ?"
+            params.append(book_id)
+
+            result = self.db.execute_update(query, tuple(params))
+            if result:
+                print("Book updated successfully!")
+            else:
+                print("Failed to update book. Check if the book exists.")
+        except ValueError:
+            print("Please enter valid numeric values for publication year and total copies.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def remove_book(self):
+        """Remove a book from the library"""
+        try:
+            book_id = int(input("Enter Book ID to remove: "))
+            query = "DELETE FROM Book WHERE book_id = ?"
+            result = self.db.execute_update(query, (book_id,))
+            if result:
+                print("Book removed successfully!")
+            else:
+                print("Failed to remove book. Check if the book exists.")
+        except ValueError:
+            print("Please enter a valid numeric Book ID.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def view_all_books(self):
+        """View all books in the library"""
+        try:
+            query = "SELECT * FROM Book"
+            books = self.db.execute_query(query)
+            if books:
+                print("\nAll Books:")
+                for book in books:
+                    print(f"ID: {book['book_id']}, Title: {book['title']}, Author: {book['author']}, "
+                          f"ISBN: {book['isbn']}, Year: {book['publication_year']}, "
+                          f"Genre: {book['genre']}, Total Copies: {book['total_copies']}, "
+                          f"Available Copies: {book['available_copies']}")
+            else:
+                print("No books found.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def search_books(self):
+        """Search for books by title, author, or ISBN"""
+        try:
+            search_term = input("Enter search term (title, author, or ISBN): ").strip()
+            query = """
+            SELECT * FROM Book 
+            WHERE title LIKE ? OR author LIKE ? OR isbn LIKE ?
+            """
+            params = ('%' + search_term + '%', '%' + search_term + '%', '%' + search_term + '%')
+            books = self.db.execute_query(query, params)
+            
+            if books:
+                print("\nSearch Results:")
+                for book in books:
+                    print(f"ID: {book['book_id']}, Title: {book['title']}, Author: {book['author']}, "
+                          f"ISBN: {book['isbn']}, Year: {book['publication_year']}, "
+                          f"Genre: {book['genre']}, Total Copies: {book['total_copies']}, "
+                          f"Available Copies: {book['available_copies']}")
+            else:
+                print("No books found matching the search term.")
+        except Exception as e:
+            print(f"Error: {e}")

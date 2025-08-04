@@ -188,13 +188,13 @@ class LibraryManagementSystem:
             book_id = int(input("Enter Book ID: "))
             
             # Check if member exists
-            member_check = self.execute_query("SELECT * FROM MEMBER WHERE member_id = ?", (member_id,))
+            member_check = self.db.execute_query("SELECT * FROM MEMBER WHERE member_id = ?", (member_id,))
             if not member_check:
                 print("Member not found!")
                 return
             
             # Check if book exists and is available
-            book_check = self.execute_query(
+            book_check = self.db.execute_query(
                 "SELECT * FROM BOOK WHERE book_id = ? AND available_copies > 0", 
                 (book_id,)
             )
@@ -203,7 +203,7 @@ class LibraryManagementSystem:
                 return
             
             # Check member's current loan count
-            loan_count = self.execute_query(
+            loan_count = self.db.execute_query(
                 "SELECT COUNT(*) as count FROM LOAN WHERE member_id = ? AND status = 'Active'",
                 (member_id,)
             )[0]['count']
@@ -228,16 +228,16 @@ class LibraryManagementSystem:
             """
             
             # Execute queries
-            if (self.execute_update(insert_loan, (member_id, book_id, loan_date, due_date)) > 0 and
-                self.execute_update(update_book, (book_id,)) > 0):
-                
+            if (self.db.execute_update(insert_loan, (member_id, book_id, loan_date, due_date)) > 0 and
+                self.db.execute_update(update_book, (book_id,)) > 0):
+
                 member_name = f"{member_check[0]['first_name']} {member_check[0]['last_name']}"
                 book_title = book_check[0]['title']
                 
                 print(f"Book borrowed successfully!")
                 print(f"Member: {member_name}")
                 print(f"Book: {book_title}")
-                print(f"Due Date: {due_date.strftime('%b %#d, %Y')}")
+                print(f"Due Date: {due_date}")
             else:
                 print("Failed to process book borrowing!")
                 
@@ -253,7 +253,7 @@ class LibraryManagementSystem:
             book_id = int(input("Enter Book ID: "))
             
             # Check if loan exists
-            loan_check = self.execute_query(
+            loan_check = self.db.execute_query(
                 "SELECT * FROM LOAN WHERE member_id = ? AND book_id = ? AND status = 'Active'",
                 (member_id, book_id)
             )
@@ -267,8 +267,8 @@ class LibraryManagementSystem:
             UPDATE LOAN SET due_date = ? WHERE member_id = ? AND book_id = ? AND status = 'Active'
             """
             
-            if self.execute_update(update_loan, (new_due_date, member_id, book_id)) > 0:
-                print(f"Book renewed successfully! New Due Date: {new_due_date.strftime('%b %#d, %Y')}")
+            if self.db.execute_update(update_loan, (new_due_date, member_id, book_id)) > 0:
+                print(f"Book renewed successfully! New Due Date: {new_due_date}")
             else:
                 print("Failed to renew the book!")
                 
@@ -284,7 +284,7 @@ class LibraryManagementSystem:
             book_id = int(input("Enter Book ID: "))
             
             # Check if loan exists
-            loan_check = self.execute_query(
+            loan_check = self.db.execute_query(
                 "SELECT * FROM LOAN WHERE member_id = ? AND book_id = ? AND status = 'Active'",
                 (member_id, book_id)
             )
@@ -303,9 +303,9 @@ class LibraryManagementSystem:
             WHERE book_id = ?
             """
             
-            if (self.execute_update(update_loan, (member_id, book_id)) > 0 and
-                self.execute_update(update_book, (book_id,)) > 0):
-                
+            if (self.db.execute_update(update_loan, (member_id, book_id)) > 0 and
+                self.db.execute_update(update_book, (book_id,)) > 0):
+
                 print("Book returned successfully!")
             else:
                 print("Failed to return the book!")

@@ -392,3 +392,51 @@ class LibraryManagementSystem:
         except Exception as e:
             print(f"Error: {e}")
 
+    def update_book(self):
+        """Update an existing book in the library"""
+        try:
+            book_id = int(input("Enter Book ID to update: "))
+            title = input("Enter new book title (leave blank to keep current): ").strip()
+            author = input("Enter new author name (leave blank to keep current): ").strip()
+            isbn = input("Enter new ISBN (leave blank to keep current): ").strip()
+            publication_year = input("Enter new publication year (leave blank to keep current): ").strip()
+            genre = input("Enter new genre (leave blank to keep current): ").strip()
+            total_copies = input("Enter new total copies (leave blank to keep current): ").strip()
+
+            query = "UPDATE Book SET "
+            params = []
+
+            if title:
+                query += "title = ?, "
+                params.append(title)
+            if author:
+                query += "author = ?, "
+                params.append(author)
+            if isbn:
+                query += "isbn = ?, "
+                params.append(isbn)
+            if publication_year:
+                query += "publication_year = ?, "
+                params.append(int(publication_year))
+            if genre:
+                query += "genre = ?, "
+                params.append(genre)
+            if total_copies:
+                query += "total_copies = ?, available_copies = ? "
+                params.append(int(total_copies))
+                params.append(int(total_copies))  # Reset available copies to total copies
+            else:
+                query = query.rstrip(", ")  # Remove trailing comma
+
+            query += " WHERE book_id = ?"
+            params.append(book_id)
+
+            result = self.db.execute_update(query, tuple(params))
+            if result:
+                print("Book updated successfully!")
+            else:
+                print("Failed to update book. Check if the book exists.")
+        except ValueError:
+            print("Please enter valid numeric values for publication year and total copies.")
+        except Exception as e:
+            print(f"Error: {e}")

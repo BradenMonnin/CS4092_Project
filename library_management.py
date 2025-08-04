@@ -710,3 +710,19 @@ class LibraryManagementSystem:
             print("Please enter a valid numeric Staff ID.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def view_all_staff(self):
+        """View all staff members"""
+        try:
+            query = "SELECT * FROM Staff"
+            staff_members = self.db.execute_query(query)
+            if staff_members:
+                print("\nAll Staff Members:")
+                for staff in staff_members:
+                    print(f"ID: {staff['staff_id']}, Name: {staff['first_name']} {staff['last_name']}, "
+                          f"Email: {staff['email']}, Phone: {staff['phone']}, Role: {staff['role']}, "
+                          f"Hire Date: {staff['hire_date']}")
+            else:
+                print("No staff members found.")
+        except Exception as e:
+            print(f"Error: {e}")

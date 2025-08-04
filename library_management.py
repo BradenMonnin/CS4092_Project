@@ -455,3 +455,20 @@ class LibraryManagementSystem:
             print("Please enter a valid numeric Book ID.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def view_all_books(self):
+        """View all books in the library"""
+        try:
+            query = "SELECT * FROM Book"
+            books = self.db.execute_query(query)
+            if books:
+                print("\nAll Books:")
+                for book in books:
+                    print(f"ID: {book['book_id']}, Title: {book['title']}, Author: {book['author']}, "
+                          f"ISBN: {book['isbn']}, Year: {book['publication_year']}, "
+                          f"Genre: {book['genre']}, Total Copies: {book['total_copies']}, "
+                          f"Available Copies: {book['available_copies']}")
+            else:
+                print("No books found.")
+        except Exception as e:
+            print(f"Error: {e}")

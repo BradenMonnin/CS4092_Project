@@ -440,3 +440,18 @@ class LibraryManagementSystem:
             print("Please enter valid numeric values for publication year and total copies.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def remove_book(self):
+        """Remove a book from the library"""
+        try:
+            book_id = int(input("Enter Book ID to remove: "))
+            query = "DELETE FROM Book WHERE book_id = ?"
+            result = self.db.execute_update(query, (book_id,))
+            if result:
+                print("Book removed successfully!")
+            else:
+                print("Failed to remove book. Check if the book exists.")
+        except ValueError:
+            print("Please enter a valid numeric Book ID.")
+        except Exception as e:
+            print(f"Error: {e}")

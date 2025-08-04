@@ -472,3 +472,26 @@ class LibraryManagementSystem:
                 print("No books found.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def search_books(self):
+        """Search for books by title, author, or ISBN"""
+        try:
+            search_term = input("Enter search term (title, author, or ISBN): ").strip()
+            query = """
+            SELECT * FROM Book 
+            WHERE title LIKE ? OR author LIKE ? OR isbn LIKE ?
+            """
+            params = ('%' + search_term + '%', '%' + search_term + '%', '%' + search_term + '%')
+            books = self.db.execute_query(query, params)
+            
+            if books:
+                print("\nSearch Results:")
+                for book in books:
+                    print(f"ID: {book['book_id']}, Title: {book['title']}, Author: {book['author']}, "
+                          f"ISBN: {book['isbn']}, Year: {book['publication_year']}, "
+                          f"Genre: {book['genre']}, Total Copies: {book['total_copies']}, "
+                          f"Available Copies: {book['available_copies']}")
+            else:
+                print("No books found matching the search term.")
+        except Exception as e:
+            print(f"Error: {e}")

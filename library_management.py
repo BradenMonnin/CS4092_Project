@@ -630,3 +630,26 @@ class LibraryManagementSystem:
                 print("No members found matching the search term.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def add_staff(self):
+        """Add a new staff member"""
+        try:
+            first_name = input("Enter first name: ").strip()
+            last_name = input("Enter last name: ").strip()
+            email = input("Enter email: ").strip()
+            phone = input("Enter phone (optional): ").strip()
+            role = input("Enter role (e.g., Librarian, Manager): ").strip()
+            hire_date = datetime.now().strftime('%Y-%m-%d')
+
+            query = """
+            INSERT INTO Staff (first_name, last_name, email, phone, role, hire_date)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """
+            params = (first_name, last_name, email, phone, role, hire_date)
+            result = self.db.execute_update(query, params)
+            if result:
+                print("Staff member added successfully!")
+            else:
+                print("Failed to add staff member. Email may already exist.")
+        except Exception as e:
+            print(f"Error: {e}")

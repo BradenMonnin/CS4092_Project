@@ -188,13 +188,13 @@ class LibraryManagementSystem:
             book_id = int(input("Enter Book ID: "))
             
             # Check if member exists
-            member_check = self.execute_query("SELECT * FROM MEMBER WHERE member_id = ?", (member_id,))
+            member_check = self.db.execute_query("SELECT * FROM MEMBER WHERE member_id = ?", (member_id,))
             if not member_check:
                 print("Member not found!")
                 return
             
             # Check if book exists and is available
-            book_check = self.execute_query(
+            book_check = self.db.execute_query(
                 "SELECT * FROM BOOK WHERE book_id = ? AND available_copies > 0", 
                 (book_id,)
             )
@@ -203,7 +203,7 @@ class LibraryManagementSystem:
                 return
             
             # Check member's current loan count
-            loan_count = self.execute_query(
+            loan_count = self.db.execute_query(
                 "SELECT COUNT(*) as count FROM LOAN WHERE member_id = ? AND status = 'Active'",
                 (member_id,)
             )[0]['count']
@@ -228,16 +228,16 @@ class LibraryManagementSystem:
             """
             
             # Execute queries
-            if (self.execute_update(insert_loan, (member_id, book_id, loan_date, due_date)) > 0 and
-                self.execute_update(update_book, (book_id,)) > 0):
-                
+            if (self.db.execute_update(insert_loan, (member_id, book_id, loan_date, due_date)) > 0 and
+                self.db.execute_update(update_book, (book_id,)) > 0):
+
                 member_name = f"{member_check[0]['first_name']} {member_check[0]['last_name']}"
                 book_title = book_check[0]['title']
                 
                 print(f"Book borrowed successfully!")
                 print(f"Member: {member_name}")
                 print(f"Book: {book_title}")
-                print(f"Due Date: {due_date.strftime('%b %#d, %Y')}")
+                print(f"Due Date: {due_date}")
             else:
                 print("Failed to process book borrowing!")
                 
@@ -253,7 +253,7 @@ class LibraryManagementSystem:
             book_id = int(input("Enter Book ID: "))
             
             # Check if loan exists
-            loan_check = self.execute_query(
+            loan_check = self.db.execute_query(
                 "SELECT * FROM LOAN WHERE member_id = ? AND book_id = ? AND status = 'Active'",
                 (member_id, book_id)
             )
@@ -267,8 +267,8 @@ class LibraryManagementSystem:
             UPDATE LOAN SET due_date = ? WHERE member_id = ? AND book_id = ? AND status = 'Active'
             """
             
-            if self.execute_update(update_loan, (new_due_date, member_id, book_id)) > 0:
-                print(f"Book renewed successfully! New Due Date: {new_due_date.strftime('%b %#d, %Y')}")
+            if self.db.execute_update(update_loan, (new_due_date, member_id, book_id)) > 0:
+                print(f"Book renewed successfully! New Due Date: {new_due_date}")
             else:
                 print("Failed to renew the book!")
                 
@@ -284,7 +284,7 @@ class LibraryManagementSystem:
             book_id = int(input("Enter Book ID: "))
             
             # Check if loan exists
-            loan_check = self.execute_query(
+            loan_check = self.db.execute_query(
                 "SELECT * FROM LOAN WHERE member_id = ? AND book_id = ? AND status = 'Active'",
                 (member_id, book_id)
             )
@@ -303,9 +303,9 @@ class LibraryManagementSystem:
             WHERE book_id = ?
             """
             
-            if (self.execute_update(update_loan, (member_id, book_id)) > 0 and
-                self.execute_update(update_book, (book_id,)) > 0):
-                
+            if (self.db.execute_update(update_loan, (member_id, book_id)) > 0 and
+                self.db.execute_update(update_book, (book_id,)) > 0):
+
                 print("Book returned successfully!")
             else:
                 print("Failed to return the book!")
@@ -495,3 +495,271 @@ class LibraryManagementSystem:
                 print("No books found matching the search term.")
         except Exception as e:
             print(f"Error: {e}")
+
+    def register_member(self):
+        """Register a new library member"""
+        try:
+            first_name = input("Enter first name: ").strip()
+            last_name = input("Enter last name: ").strip()
+            email = input("Enter email: ").strip()
+            phone = input("Enter phone (optional): ").strip()
+            street = input("Enter street address (optional): ").strip()
+            city = input("Enter city (optional): ").strip()
+            state = input("Enter state (optional): ").strip()
+            zip_code = input("Enter zip code (optional): ").strip()
+            join_date = datetime.now().strftime('%Y-%m-%d')
+
+            query = """
+            INSERT INTO Member (first_name, last_name, email, phone, street, city, state, zip_code, join_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            params = (first_name, last_name, email, phone, street, city, state, zip_code, join_date)
+            result = self.db.execute_update(query, params)
+            if result:
+                print("Member registered successfully!")
+            else:
+                print("Failed to register member. Email may already exist.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def update_member(self):
+        """Update an existing library member"""
+        try:
+            member_id = int(input("Enter Member ID to update: "))
+            first_name = input("Enter new first name (leave blank to keep current): ").strip()
+            last_name = input("Enter new last name (leave blank to keep current): ").strip()
+            email = input("Enter new email (leave blank to keep current): ").strip()
+            phone = input("Enter new phone (leave blank to keep current): ").strip()
+            street = input("Enter new street address (leave blank to keep current): ").strip()
+            city = input("Enter new city (leave blank to keep current): ").strip()
+            state = input("Enter new state (leave blank to keep current): ").strip()
+            zip_code = input("Enter new zip code (leave blank to keep current): ").strip()
+
+            query = "UPDATE Member SET "
+            params = []
+
+            if first_name:
+                query += "first_name = ?, "
+                params.append(first_name)
+            if last_name:
+                query += "last_name = ?, "
+                params.append(last_name)
+            if email:
+                query += "email = ?, "
+                params.append(email)
+            if phone:
+                query += "phone = ?, "
+                params.append(phone)
+            if street:
+                query += "street = ?, "
+                params.append(street)
+            if city:
+                query += "city = ?, "
+                params.append(city)
+            if state:
+                query += "state = ?, "
+                params.append(state)
+            if zip_code:
+                query += "zip_code = ? "
+                params.append(zip_code)
+
+            query = query.rstrip(", ") + " WHERE member_id = ?"
+            params.append(member_id)
+
+            result = self.db.execute_update(query, tuple(params))
+            if result:
+                print("Member updated successfully!")
+            else:
+                print("Failed to update member. Check if the member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Member ID.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def remove_member(self):
+        """Remove a library member"""
+        try:
+            member_id = int(input("Enter Member ID to remove: "))
+            query = "DELETE FROM Member WHERE member_id = ?"
+            result = self.db.execute_update(query, (member_id,))
+            if result:
+                print("Member removed successfully!")
+            else:
+                print("Failed to remove member. Check if the member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Member ID.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def view_all_members(self):
+        """View all library members"""
+        try:
+            query = "SELECT * FROM Member"
+            members = self.db.execute_query(query)
+            if members:
+                print("\nAll Members:")
+                for member in members:
+                    print(f"ID: {member['member_id']}, Name: {member['first_name']} {member['last_name']}, "
+                          f"Email: {member['email']}, Phone: {member['phone']}, "
+                          f"Address: {member['street']}, {member['city']}, {member['state']} {member['zip_code']}, "
+                          f"Join Date: {member['join_date']}")
+            else:
+                print("No members found.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def search_members(self):
+        """Search for members by full name or email"""
+        try:
+            search_term = input("Enter search term (full name or email): ").strip()
+            query = """
+            SELECT * FROM Member 
+            WHERE (first_name || ' ' || last_name) LIKE ? OR email LIKE ?
+            """
+            params = ('%' + search_term + '%', '%' + search_term + '%')
+            members = self.db.execute_query(query, params)
+            
+            if members:
+                print("\nSearch Results:")
+                for member in members:
+                    print(f"ID: {member['member_id']}, Name: {member['first_name']} {member['last_name']}, "
+                          f"Email: {member['email']}, Phone: {member['phone']}, "
+                          f"Address: {member['street']}, {member['city']}, {member['state']} {member['zip_code']}, "
+                          f"Join Date: {member['join_date']}")
+            else:
+                print("No members found matching the search term.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def add_staff(self):
+        """Add a new staff member"""
+        try:
+            first_name = input("Enter first name: ").strip()
+            last_name = input("Enter last name: ").strip()
+            email = input("Enter email: ").strip()
+            phone = input("Enter phone (optional): ").strip()
+            role = input("Enter role (e.g., Librarian, Manager): ").strip()
+            hire_date = datetime.now().strftime('%Y-%m-%d')
+
+            query = """
+            INSERT INTO Staff (first_name, last_name, email, phone, role, hire_date)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """
+            params = (first_name, last_name, email, phone, role, hire_date)
+            result = self.db.execute_update(query, params)
+            if result:
+                print("Staff member added successfully!")
+            else:
+                print("Failed to add staff member. Email may already exist.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def update_staff(self):
+        """Update an existing staff member"""
+        try:
+            staff_id = int(input("Enter Staff ID to update: "))
+            first_name = input("Enter new first name (leave blank to keep current): ").strip()
+            last_name = input("Enter new last name (leave blank to keep current): ").strip()
+            email = input("Enter new email (leave blank to keep current): ").strip()
+            phone = input("Enter new phone (leave blank to keep current): ").strip()
+            role = input("Enter new role (leave blank to keep current): ").strip()
+
+            query = "UPDATE Staff SET "
+            params = []
+
+            if first_name:
+                query += "first_name = ?, "
+                params.append(first_name)
+            if last_name:
+                query += "last_name = ?, "
+                params.append(last_name)
+            if email:
+                query += "email = ?, "
+                params.append(email)
+            if phone:
+                query += "phone = ?, "
+                params.append(phone)
+            if role:
+                query += "role = ? "
+                params.append(role)
+
+            query = query.rstrip(", ") + " WHERE staff_id = ?"
+            params.append(staff_id)
+
+            result = self.db.execute_update(query, tuple(params))
+            if result:
+                print("Staff member updated successfully!")
+            else:
+                print("Failed to update staff member. Check if the staff member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Staff ID.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def remove_staff(self):
+        """Remove a staff member"""
+        try:
+            staff_id = int(input("Enter Staff ID to remove: "))
+            query = "DELETE FROM Staff WHERE staff_id = ?"
+            result = self.db.execute_update(query, (staff_id,))
+            if result:
+                print("Staff member removed successfully!")
+            else:
+                print("Failed to remove staff member. Check if the staff member exists.")
+        except ValueError:
+            print("Please enter a valid numeric Staff ID.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def view_all_staff(self):
+        """View all staff members"""
+        try:
+            query = "SELECT * FROM Staff"
+            staff_members = self.db.execute_query(query)
+            if staff_members:
+                print("\nAll Staff Members:")
+                for staff in staff_members:
+                    print(f"ID: {staff['staff_id']}, Name: {staff['first_name']} {staff['last_name']}, "
+                          f"Email: {staff['email']}, Phone: {staff['phone']}, Role: {staff['role']}, "
+                          f"Hire Date: {staff['hire_date']}")
+            else:
+                print("No staff members found.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def search_staff(self):
+        """Search for staff members by full name or email"""
+        try:
+            search_term = input("Enter search term (full name or email): ").strip()
+            query = """
+            SELECT * FROM Staff 
+            WHERE (first_name || ' ' || last_name) LIKE ? OR email LIKE ?
+            """
+            params = ('%' + search_term + '%', '%' + search_term + '%')
+            staff_members = self.db.execute_query(query, params)
+            
+            if staff_members:
+                print("\nSearch Results:")
+                for staff in staff_members:
+                    print(f"ID: {staff['staff_id']}, Name: {staff['first_name']} {staff['last_name']}, "
+                          f"Email: {staff['email']}, Phone: {staff['phone']}, Role: {staff['role']}, "
+                          f"Hire Date: {staff['hire_date']}")
+            else:
+                print("No staff members found matching the search term.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+
+
+def main():
+    system = LibraryManagementSystem()
+    while True:
+        system.display_menu()
+        exit_choice = input("Type 'exit' to quit or press Enter to continue: ").strip().lower()
+        if exit_choice == 'exit':
+            system.db.disconnect()
+            print("Goodbye!")
+            break
+
+if __name__ == "__main__":
+    main()
